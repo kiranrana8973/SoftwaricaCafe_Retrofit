@@ -19,7 +19,6 @@ import com.kiran.softmandu.firebase.FirebaseHelper
 class LoginActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityLoginBinding
-    private lateinit var progressDialog: ProgressDialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,18 +39,9 @@ class LoginActivity : AppCompatActivity() {
         val password = binding.etPassword.text.toString()
 
         binding.progressBar.visibility = View.VISIBLE
-       // showProgressDialog()
+        // showProgressDialog()
         FirebaseHelper().checkUser(this, email, password)
 
-    }
-
-    private fun closeProgressDialog() {
-        progressDialog.dismiss()
-    }
-
-    private fun showProgressDialog() {
-        progressDialog = ProgressDialog(this)
-        progressDialog.show()
     }
 
     fun showMessageFromFirestore(message: String, isError: Boolean) {
@@ -71,7 +61,6 @@ class LoginActivity : AppCompatActivity() {
     }
 
     fun loadDashboard() {
-        closeProgressDialog()
         startActivity(Intent(this, DashboardActivity::class.java))
         finish()
     }

@@ -3,10 +3,12 @@ package com.kiran.softmandu.firebase
 import android.content.Context
 import android.content.SharedPreferences
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.SetOptions
+import com.google.firebase.firestore.*
 import com.kiran.softmandu.activities.LoginActivity
 import com.kiran.softmandu.activities.RegisterActivity
+import com.kiran.softmandu.activities.ui.dashboard.DashboardFragment
+import com.kiran.softmandu.activities.ui.home.HomeFragment
+import com.kiran.softmandu.model.Item
 import com.kiran.softmandu.utils.Constants
 import com.kiran.softmandu.model.User
 
@@ -77,4 +79,24 @@ class FirebaseHelper {
             }
     }
 
+    // -------------------------ITEMS-------------------------
+
+    fun getAllItems(fragment: HomeFragment){
+        val lstItems = mutableListOf<Item>()
+        mFireStore.collection(Constants.TBL_ITEM)
+            .addSnapshotListener { value, error ->
+                if (error != null) {
+                    fragment.showErrorFromFireStore(error.localizedMessage)
+                    return@addSnapshotListener
+                }
+
+                for (dc: DocumentChange in value?.documentChanges!!) {
+                    if (dc.type == DocumentChange.Type.ADDED)
+                        lstItems.add(dc.document.toObject(Item::class.java))
+                }
+
+                fragment.getItemsFromFireStore(lstItems)
+            }
+
+    }
 }
