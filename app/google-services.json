@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "274812272702",
+    "project_id": "softmandu-99089",
+    "storage_bucket": "softmandu-99089.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:274812272702:android:0f110f18555daf7ef3516f",
+        "android_client_info": {
+          "package_name": "com.kiran.softmandu"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "274812272702-4aal5e48m9g7p466n42g4525o2qj77eq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCbf4y4BErvCRVri8N1McEnWTG80W_4bVc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "274812272702-4aal5e48m9g7p466n42g4525o2qj77eq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

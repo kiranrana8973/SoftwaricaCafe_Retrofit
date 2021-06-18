@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">SoftCafe</string>
+    <string name="registeruser">No account? <u>Register here</u>.</string>
+</resources>
