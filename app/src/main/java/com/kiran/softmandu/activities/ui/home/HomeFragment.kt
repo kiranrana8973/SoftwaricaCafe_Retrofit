@@ -13,9 +13,12 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.android.material.snackbar.Snackbar
 import com.kiran.softmandu.R
+import com.kiran.softmandu.adapter.ItemAdapter
 import com.kiran.softmandu.databinding.FragmentHomeBinding
 import com.kiran.softmandu.firebase.FirebaseHelper
 import com.kiran.softmandu.model.Item
@@ -23,9 +26,10 @@ import com.kiran.softmandu.model.Item
 class HomeFragment : Fragment() {
 
     private lateinit var progressDialog: ProgressDialog
-    private lateinit var binding : FragmentHomeBinding
-    private lateinit var textView : TextView
-    private lateinit var imageView : ImageView
+    private lateinit var binding: FragmentHomeBinding
+    private lateinit var textView: TextView
+    private lateinit var imageView: ImageView
+    private lateinit var recyclerView: RecyclerView
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -35,28 +39,22 @@ class HomeFragment : Fragment() {
 
         val root = inflater.inflate(R.layout.fragment_home, container, false)
 
-        val lstItems = FirebaseHelper().getAllItems(this)
+        recyclerView = root.findViewById(R.id.recyclerView)
 
-        textView = root.findViewById(R.id.textView)
-        imageView = root.findViewById(R.id.imageView)
-
+        FirebaseHelper().getAllItems(this)
 
         return root
     }
 
-    fun getItemsFromFireStore(lstItems : List<Item>){
-        textView.text ="No of items :  ${lstItems.size}"
-
-        lstItems[0].imageUrl
-        Glide.with(requireActivity())
-            .load(lstItems[0].imageUrl)
-            .into(imageView)
-
+    fun getItemsFromFireStore(lstItems: List<Item>) {
+        recyclerView.adapter = ItemAdapter(requireContext(), lstItems.toMutableList())
+        recyclerView.layoutManager = LinearLayoutManager(requireContext())
     }
 
-    fun showErrorFromFireStore(message : String){
+    fun showErrorFromFireStore(message: String) {
         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
+
     fun showProgressDialog() {
         progressDialog = ProgressDialog(requireContext())
         progressDialog.setTitle("Loading")
