@@ -24,7 +24,7 @@ class FirebaseHelper {
                 activity.showMessageFromFirestore("Registered Successfully", false)
             }
             .addOnFailureListener {
-                activity.showMessageFromFirestore(it.localizedMessage, true)
+                activity.showMessageFromFirestore(it.localizedMessage!!, true)
             }
     }
 

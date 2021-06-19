@@ -6,12 +6,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import com.bumptech.glide.Glide
 import com.google.android.material.snackbar.Snackbar
 import com.kiran.softmandu.R
 import com.kiran.softmandu.databinding.FragmentHomeBinding
@@ -23,6 +25,7 @@ class HomeFragment : Fragment() {
     private lateinit var progressDialog: ProgressDialog
     private lateinit var binding : FragmentHomeBinding
     private lateinit var textView : TextView
+    private lateinit var imageView : ImageView
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -34,7 +37,8 @@ class HomeFragment : Fragment() {
 
         val lstItems = FirebaseHelper().getAllItems(this)
 
-        textView = root.findViewById(R.id.text_home)
+        textView = root.findViewById(R.id.textView)
+        imageView = root.findViewById(R.id.imageView)
 
 
         return root
@@ -42,6 +46,11 @@ class HomeFragment : Fragment() {
 
     fun getItemsFromFireStore(lstItems : List<Item>){
         textView.text ="No of items :  ${lstItems.size}"
+
+        lstItems[0].imageUrl
+        Glide.with(requireActivity())
+            .load(lstItems[0].imageUrl)
+            .into(imageView)
 
     }
 
