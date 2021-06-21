@@ -1,16 +1,28 @@
 package com.kiran.softmandu.firebase
 
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
+import android.net.Uri
+import android.widget.Toast
+import com.google.android.gms.tasks.Continuation
+import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.*
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
+import com.google.firebase.storage.UploadTask
 import com.kiran.softmandu.activities.LoginActivity
 import com.kiran.softmandu.activities.RegisterActivity
 import com.kiran.softmandu.activities.ui.dashboard.DashboardFragment
 import com.kiran.softmandu.activities.ui.home.HomeFragment
+import com.kiran.softmandu.activities.ui.notifications.NotificationsFragment
 import com.kiran.softmandu.model.Item
 import com.kiran.softmandu.utils.Constants
 import com.kiran.softmandu.model.User
+import java.util.*
+import kotlin.collections.HashMap
 
 class FirebaseHelper {
 
@@ -81,7 +93,7 @@ class FirebaseHelper {
 
     // -------------------------ITEMS-------------------------
 
-    fun getAllItems(fragment: HomeFragment){
+    fun getAllItems(fragment: HomeFragment) {
         val lstItems = mutableListOf<Item>()
         mFireStore.collection(Constants.TBL_ITEM)
             .addSnapshotListener { value, error ->
@@ -98,5 +110,68 @@ class FirebaseHelper {
                 fragment.getItemsFromFireStore(lstItems)
             }
 
+    }
+
+//    private fun uploadImage(filePath: String) {
+//
+//        val ref = FirebaseStorage.getInstance()?.child("uploads/" + UUID.randomUUID().toString())
+//        val uploadTask = ref?.putFile(filePath!!)
+//
+//        val urlTask =
+//            uploadTask?.continueWithTask(Continuation<UploadTask.TaskSnapshot, Task<Uri>> { task ->
+//                if (!task.isSuccessful) {
+//                    task.exception?.let {
+//                        throw it
+//                    }
+//                }
+//                return@Continuation ref.downloadUrl
+//            })?.addOnCompleteListener { task ->
+//                if (task.isSuccessful) {
+//                    val downloadUri = task.result
+//                    addUploadRecordToDb(downloadUri.toString())
+//                } else {
+//                    // Handle failures
+//                }
+//            }?.addOnFailureListener {
+//
+//            }
+//    }
+//
+
+    fun uploadImageToCloudStorage(
+        fragment: NotificationsFragment,
+        imageFileURI: Uri?,
+        fileExtension: String
+    ) {
+        val sRef: StorageReference = FirebaseStorage.getInstance().reference.child(
+            "User_profile" + System.currentTimeMillis() + ".$fileExtension"
+        )
+
+        sRef.putFile(imageFileURI!!).addOnSuccessListener { taskSnapshot ->
+            // Get the downloadable URL from the task snapshot
+            taskSnapshot.metadata!!.reference!!.downloadUrl
+                .addOnSuccessListener { uri ->
+                    val downloadableImageURL = uri.toString()
+                    // activity.imageUploadSuccess(downloadableImageURL)
+                    fragment.imageUploadSuccess(downloadableImageURL)
+                }
+        }
+            .addOnFailureListener { exception ->
+                fragment.showErrorMessage(exception.localizedMessage)
+            }
+
+    }
+
+    fun updateUserProfile(fragment: NotificationsFragment, userHasMap: HashMap<String, Any>) {
+        mFireStore.collection(Constants.TBL_USER)
+            .document(getCurrentUserID())
+            .update(userHasMap)
+            .addOnSuccessListener {
+                fragment.uploadSuccess("Updated successfuly")
+
+            }
+            .addOnFailureListener {
+                fragment.uploadSuccess(it.localizedMessage.toString())
+            }
     }
 }

@@ -44,7 +44,7 @@
         app:layout_constraintTop_toBottomOf="@+id/etFname" />
 
     <Button
-        android:id="@+id/button"
+        android:id="@+id/btnUpdateUser"
         android:layout_width="316dp"
         android:layout_height="57dp"
         android:layout_marginTop="20dp"

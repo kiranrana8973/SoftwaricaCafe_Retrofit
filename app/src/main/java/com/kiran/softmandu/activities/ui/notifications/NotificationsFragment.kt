@@ -7,11 +7,13 @@ import android.content.ContextWrapper
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
+import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.MimeTypeMap
 import android.widget.*
 import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.Fragment
@@ -25,6 +27,7 @@ import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.kiran.softmandu.R
 import com.kiran.softmandu.databinding.DialogCustomImageSelectorBinding
+import com.kiran.softmandu.firebase.FirebaseHelper
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -38,10 +41,17 @@ class NotificationsFragment : Fragment() {
     private lateinit var imgChooseImage: ImageButton
     private lateinit var etFname: EditText
     private lateinit var eLtname: EditText
+    private lateinit var btnUpdateUser: Button
+
     private lateinit var binding: DialogCustomImageSelectorBinding
     private val IMAGE_DIRECTORY = "myImages"
     private lateinit var dialog: Dialog
     private var imagePath: String = ""
+
+    private val CAMERA_CODE = 1
+    private val GALLERY_CODE = 2
+
+    private var firebaseUploadedImageUrl: String = ""
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -58,18 +68,32 @@ class NotificationsFragment : Fragment() {
         imgUser = root.findViewById(R.id.imgUser)
         etFname = root.findViewById(R.id.etFname)
         eLtname = root.findViewById(R.id.etLname)
+        btnUpdateUser = root.findViewById(R.id.btnUpdateUser)
         imgChooseImage = root.findViewById(R.id.imgChooseImage)
 
         imgChooseImage.setOnClickListener {
             chooseImage()
         }
 
+        btnUpdateUser.setOnClickListener {
+            uploadImageandUpdate()
+        }
         return root
     }
 
+    fun showErrorMessage(message: String) {
+        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+    }
+
+    fun uploadSuccess(message: String) {
+        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun uploadImageandUpdate() {
+        FirebaseHelper().uploadImageToCloudStorage(this, contentUri, ".jpg")
+    }
+
     private fun chooseImage() {
-
-
         binding.btnLoadCamera.setOnClickListener {
             loadCamera()
             dialog.dismiss()
@@ -87,13 +111,12 @@ class NotificationsFragment : Fragment() {
         startActivityForResult(intent, GALLERY_CODE)
     }
 
-    private val CAMERA_CODE = 1
-    private val GALLERY_CODE = 2
     private fun loadCamera() {
         val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         startActivityForResult(intent, CAMERA_CODE)
     }
 
+    private var contentUri : Uri = Uri.parse("")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == Activity.RESULT_OK) {
@@ -102,17 +125,24 @@ class NotificationsFragment : Fragment() {
                     val thumbnail: Bitmap = data.extras!!.get("data") as Bitmap
                     // imgUser.setImageBitmap(thumbnail)
                     //OR
+                    imagePath = saveImageToInternalStorage(thumbnail)
+
+                    //Convert to uri because in firestore we need URI not URL
+                    // and in retrofit we need imagePath so keep both
+                    val file = File(imagePath)
+                    val mediaScanIntent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)
+                    contentUri = Uri.fromFile(file)
+
                     Glide.with(requireContext())
-                        .load(thumbnail)
+                        .load(contentUri)
                         .centerCrop()
                         .into(imgUser)
 
-                    imagePath = saveImageToInternalStorage(thumbnail)
-                    Toast.makeText(requireContext(), imagePath, Toast.LENGTH_SHORT).show()
                 }
             } else if (requestCode == GALLERY_CODE) {
                 data?.let {
                     val selectedPhotoUri = data.data
+
                     Glide.with(requireContext())
                         .load(selectedPhotoUri)
                         .centerCrop()
@@ -147,7 +177,6 @@ class NotificationsFragment : Fragment() {
                             }
                         })
                         .into(imgUser)
-
                 }
             }
         }
@@ -173,5 +202,21 @@ class NotificationsFragment : Fragment() {
         }
 
         return file.absolutePath
+    }
+
+    fun imageUploadSuccess(imageURL: String) {
+        // get the full path for the image
+        firebaseUploadedImageUrl = imageURL
+        // after getting the image url update the data in firestore database
+        updateDetails()
+    }
+
+    private fun updateDetails() {
+        val userHashMap = HashMap<String, Any>()
+        userHashMap["gender"] = "Male"
+        userHashMap["image"] = firebaseUploadedImageUrl
+
+        FirebaseHelper().updateUserProfile(this, userHashMap)
+
     }
 }
