@@ -141,8 +141,8 @@ class NotificationsFragment : Fragment() {
                 }
             } else if (requestCode == GALLERY_CODE) {
                 data?.let {
-                    val selectedPhotoUri = data.data
-
+                    val selectedPhotoUri = data.data!!
+                    contentUri = selectedPhotoUri
                     Glide.with(requireContext())
                         .load(selectedPhotoUri)
                         .centerCrop()

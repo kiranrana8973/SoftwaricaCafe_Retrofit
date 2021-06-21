@@ -27,6 +27,7 @@ class RegisterActivity : AppCompatActivity() {
         }
     }
 
+    val a = 0
     private fun registerUser() {
 
         val fname = binding.etFname.text.toString().trim()
